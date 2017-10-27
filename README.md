@@ -1,2 +1,3 @@
 # go_exercise
-My go exercise on cloud
+My go exercise on cloud.
+And notes in ebook.
