@@ -1,0 +1,41 @@
+﻿golang其他笔记
+
+从命令行读取参数
+    flag
+    os.Args[m:n]
+    
+从标准输入读取
+	// NewReader
+	in := bufio.NewReader(os.Stdin)
+	for {
+		r, _, _ := in.ReadRune()
+		// fmt.Println(r)
+		fmt.Printf("char: %c\t%U\n", r, r)
+	}
+     
+	//NewScanner, 按行读取
+	input := bufio.NewScanner(os.Stdin)
+	for input.Scan() {
+		fmt.Printf("%v\n", input.Text())
+	}
+    
+    可比较类型:
+        基本类型
+        指针
+    完全不可比较类型:
+        切片slice
+        映射类型map
+        函数func
+    
+    interface 的可比较与不可比较依赖于其动态类型
+    
+    map的key与switch操作数都应该考虑其可比较否, 特别是interface
+    
+    函数的传参方式是传值, 即使对于引用类型也是一样的
+    只不过引用类型的表现像是传引用,  其实传的地址的copy
+    对于slice需要注意的是, slice类型作为参数传入函数时, 对slice中元素的所有操作都会
+    影响到函数的外部实参, 但是在函数中对slice本身所做的修改不会对函数外部的实参有任何影响, 比如copy, append
+    都会影响到slice本身, 但是函数外部实参不会被影响到
+    
+    response.body, 当其被读取时, 其内部会记录上次被读取的位置, 所以当读取过response.body一次后
+    第二次读取不会读取到任何内容, 除非再次利用第一次读取到的数据

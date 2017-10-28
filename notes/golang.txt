@@ -1,0 +1,718 @@
+﻿入门
+    os 跨平台 程序的命令行参数可以从os.Args获取, 比如os.Args[1:]
+    空标识符: "_"
+    range返回: 索引, 元素
+    连接字符串有两种方式: "+"和strings.Join()函数
+    bufio
+        Scanner 类型是该包最有用的特性之一， 它读取输入并将其
+        拆成行或单词； 通常是处理行形式的输入最简单的方法。
+    input := bufio.NewScanner(os.Stdin)
+        从标准输入读取一行, 移除行尾换行符
+        使用input.text()得到其读取的内容
+    fmt.printf
+        %d 十进制整数
+        %x, %o, %b 十六进制， 八进制， 二进制整数。
+        %f, %g, %e 浮点数： 3.141593 3.141592653589793 3.141593e+00
+        %t 布尔： true或false
+        %c 字符（rune） (Unicode码点)
+        %s 字符串
+        %q 带双引号的字符串"abc"或带单引号的字符'c'
+        %v 变量的自然形式（natural format）
+        %T 变量的类型
+        %% 字面上的百分号标志（无操作数）
+    os.Open()
+        用于打开文件, 返回*os.File类型的文件
+        os.Stdin/Stdout等也是*os.File类型
+    f.Close()
+        关闭文件, 释放资源
+    io/ioutil
+        ioutil.ReadFile(filename) 一次读取整个文件至内存
+        ReadFile 函数返回一个字节切片（byte slice） ， 必须把它转换为 string ， 才能用 strings.Split 分割。
+        ioutil.Discard 放弃或者吸收一切传输给其的任何数据(黑洞)
+    net/http
+        resp,err := http.Get(url) 打开一个url
+        resp.Body
+            可以使用ioutil.ReadAll()读取
+            也可以使用io.Copy(os.stdout,resp.Body)的方法
+        resp是个结构, 里面有很多字段, 也有状态码
+    strings.HasPrefix(STRING,"PREFIX")
+        返回值类型BOOL
+        判断STRING是否具有PREFIX(前缀)
+    strings.HasSuffix(STRING,"SUFFIX")
+        返回值类型BOOL
+        判断后缀
+    运行时间差
+        start := time.Now()
+        end := time.Since(start).Seconds()
+    os.Exit(1)
+        以"1"为退出码, 退出当前进程
+
+入门
+    net/http
+        http.Request包含很多字段及方法
+        r.ParseForm用于解析Form
+        range r.Form用于迭代Form中的数据
+    switch
+        无须在每个case下写break
+        如果想顺序执行随后的case, 可以使用fallthrough覆盖默认的break行为
+        switch不带操作对象时默认用true值代替，然后将每个case的表达式和true值进行比较
+            这种形式叫做无tag switch(tagless switch)；这和switch true是等价的。
+            
+    可以使用fmt.Sprintf的"%T"输出变量的类型字符串
+            
+第二章 程序结构
+    go推荐使用驼峰式命名
+    四种声明语句:
+        var
+        const
+        type
+        func
+    在包一级声明语句声明的名字可在整个包对应的每个源文件中访问，而不是仅仅在其声明语句所在的源文件中访问。
+    零值
+        数值类型变量对应的零值是0，
+        布尔类型变量对应的零值是false，
+        字符串类型对应的零值是空字符串，
+        接口或引用类型（包括slice、指针、map、chan和函数）变量对应的零值是nil。
+        数组或结构体等聚合类型对应的零值是每个元素或字段都是对应该类型的零值。
+    var b, f, s = true, 2.3, "four" // bool, float64, string
+        多个不同类型的变量可以一起声明并初始化
+    简短声明
+        因为简洁和灵活的特点，简短变量声明被广泛用于大部分的局部变量的声明和初始化。
+        var形式的声明语句往往是用于需要显式指定变量类型的地方，或者因为变量稍后会被重新赋值而初始值无关紧要的地方。
+        
+        多个变量同时声明的语句中
+            简短变量声明左边的变量可能并不是全部都是刚刚声明的。
+            如果有一些已经在相同的词法域声明过了，那么简短变量声明语句对这些已经声明过的变量就只有赋值行为了。
+            简短变量声明语句只有对已经在同级词法域声明过的变量才和赋值操作语句等价，
+            如果变量是在外部词法域声明的，那么简短变量声明语句将会在当前词法域重新声明一个新的变量
+    flag
+        var n = flag.Bool("n", false, "omit trailing newline")
+        var sep = flag.String("s", " ", "separator")
+        flag.Parse()
+            n和sep均为指针
+        对于非标志参数的普通命令行参数可以通过调用flag.Args()函数来访问，返回值对应一个字符串类型的slice。
+    new(type)
+        产生type类型的匿名变量的指针
+        每次调用new函数都是返回一个新的变量的地址
+    请谨慎使用大小为0的类型，因为如果类型的大小为0的话，可能导致Go语言的自动垃圾回收器有不同的行为，具体请查看 runtime.SetFinalizer 函数相关文档
+    函数的参数变量和返回值变量都是局部变量。
+    函数的右小括弧也可以另起一行缩进
+    自增和自减是语句，而不是表达式
+    元组赋值
+        f, err = os.Open("foo.txt")
+            返回值来表达某种错误类型
+        v, ok = m[key]
+        v, ok = x.(T)
+        v, ok = <-ch
+            用来返回布尔值，通常被称为ok
+            或者
+                v = m[key] // map查找，失败时返回零值
+                v = x.(T) // type断言，失败时panic异常
+                v = <-ch // 管道接收，失败时返回零值（阻塞不算是失败）
+        我们可以用下划线空白标识符 _ 来丢弃不需要的值。
+            _, err = io.Copy(dst, src) // 丢弃字节数
+            _, ok = x.(T) // 只检测类型，忽略具体值
+    对于任何类型的值的相等比较，第二个值必须是对第一个值类型对应的变量是可赋值的，反之亦然。
+    t, err := strconv.ParseFloat(arg, 64)
+        转换字符串为float64
+    func init() { /* ... */ }
+        这样的init初始化函数除了不能被调用或引用外，其他行为和普通函数类似。
+        在每个文件中的init初始化函数，在程序开始执行时按照它们声明的顺序被自动调用。
+    一个源文件导入的包是不能被其他源文件使用的, 哪怕同属于同一个package
+    控制流语句
+        break [LABEL]
+        continue [LABEL]
+        goto [LABEL]
+        
+第三章 基础数据类型
+    基础类型
+        数字
+            整数 int8 int16 int32 int64, uint8 uint16 uint32 uint64, int uint(特定cup平台机器字大小)
+                Unicode rune--int32
+                byte--uint8
+                有符合范围: -2^(n-1) ~ 2^(n-1)-1
+                无符号范围: 0 ~ 2^n-1
+                    无符号数往往只有在位运算或其它特殊的运算场景才会使用
+                    像bit集合、分析二进制文件格式或者是哈希和加密操作等
+                以0开头的数字表示八进制数
+                    0 := 0666
+                以0x或0X开头的数表示十六进制
+                    x := int64(0xdeadbeef)
+            浮点数
+                浮点数转换成整数会丢失小数部分
+                float32
+                    math.MaxFloat32
+                float64
+                    math.MaxFloat64
+                    优先使用float64类型，因为float32类型的累计计算误差很容易扩散
+                    用Printf函数的%g参数打印浮点数，将采用更紧凑的表示形式打印，并提供足够的精度，
+                    但是对应表格的数据，使用%e（带指数）或%f的形式打印可能更合适。
+            复数
+                complex64
+                complex128
+                    var x complex128 = complex(1, 2) // 1+2i
+                    var y complex128 = complex(3, 4) // 3+4i
+                    fmt.Println(x*y) // "(-5+10i)"
+                    fmt.Println(real(x*y)) // "-5"
+                    fmt.Println(imag(x*y)) // "10"
+                        real实部, imag虚部
+                    x := 1 + 2i
+                    y := 3 + 4i
+                    复数也可以用==和!=进行相等比较
+            math.IsNaN
+            math.NaN则返回非数对应的值
+                nan := math.NaN()
+                fmt.Println(nan == nan, nan < nan, nan > nan) // "false false false"
+        字符串
+            byte存储的是单个字符
+                []byte, byte的slice, 初始化: []byte{'x'}或[]byte("string")
+                []byte转换为string: string([]byte)
+        布尔型
+    复合类型
+        数组
+        结构体
+    引用类型
+        slice
+        map
+        channel
+        指针
+        函数
+    接口类型
+    
+    %取模
+        仅适用于整数
+        在go中, 符合与被取模数符合一致: -5 % -3 = -2, -5 % 3 = -2, 这点与除法不同
+        
+    布尔型, 整型, 字符串都是可比较的
+    
+    位运算
+        & 位运算 AND
+        | 位运算 OR
+        ^ 位运算 XOR(二元)
+        ^ 取反(一元)
+        &^ 位清空 (AND NOT)
+            如果对应y中bit位为1的话, 表达式 z = x &^y 结果z的对应的bit位为0，否则z对应的bit位等于x相应的bit位的值
+        << 左移, 位移的bit数必须是无符号整数, 被位移数则无要求, 移动n位, 相当于乘以2^n
+        >> 右移, 位移的bit数必须是无符号整数, 被位移数则无要求, 移动n位, 相当于除以2^n
+            左移运算用零填充右边空缺的bit位，
+            无符号数的右移运算也是用0填充左边空缺的bit位，
+            但是有符号数的右移运算会用符号位的值填充左边空缺的bit位。
+            它们通常并不用于仅仅是表达非负数量的场合。
+        
+    Printf
+        %b 以二进制方式打印
+        %08b 打印至少8个字符宽度, 不足的前缀用0填充
+        
+        Printf("%d %[1]o %#[1]o\n", o)
+        Printf("%d %[1]x %#[1]x %#[1]X\n", x)
+            [1] 副词告诉Printf函数再次使用第一个操作数
+            ，%后的 # 副词告诉Printf在用%o、%x或%X输出时生成0、0x或0X前缀
+        
+    len函数返回的是一个有符号的整数
+        
+    
+    Go语言的常量有个不同寻常之处。虽然一个常量可以有任意有一个确定的基础类型，例如int或float64，
+    或者是类似time.Duration这样命名的基础类型，但是许多常量并没有一个明确的基础类型。        
+    
+    && 的优先级比 || 高
+    
+    布尔值并不会隐式转换为数字值0或1，反之亦然。必须使用一个显式的if语句辅助转换
+    
+    字符串可以用==和<进行比较；比较通过逐个字节比较完成的，因此比较的结果是字符串自然编码的顺序。
+    
+    一个原生的字符串面值形式是`...`，使用反引号代替双引号。在原生的字符串面值中，没有转义操作
+    
+    可以通过十六进制或八进制转义在字符串面值中包含任意的字节
+        \xhh(hh为十六进制数字)
+        \ooo(包含三个八进制数字, 但不能超过\377)
+        
+    原生字符串面值用于编写正则表达式会很方便，因为正则表达式往往会包含很多反斜杠。
+    原生字符串面值同时被广泛应用于HTML模板、JSON面值、命令行提示信息以及那些需要扩展到多行的场景。
+    
+    每个Unicode码点都使用同样大小的32bit来表示
+    
+    世界
+        "世界"
+        "\xe4\xb8\x96\xe7\x95\x8c"
+        "\u4e16\u754c"
+        "\U00004e16\U0000754c"
+        注意U的大小写
+        
+    对于小于256的码点值可以写在一个十六进制转义字节中，例如 \x41 对应字符'A'，但是对于更大的码点则必须使用 \u 或 \U 转义形式。
+    因此， \xe4\xb8\x96 并不是一个合法的rune字符，虽然这三个字节对应一个有效的UTF8编码的码点。
+    
+    Go语言的range循环在处理字符串的时候，会自动隐式解码UTF8字符串。
+        就是说可以完美的处理中文字符
+    
+    对于包含中文字符的字符串, 使用len(s)可能无法得到正确的长度, 可以使用utf8.RuneCountInString(s)
+    或者使用range累加计数
+    
+    utf8包有很多适合处理各种字符(包括中文字符)的方法函数
+    
+    如果对应码点的字符是无效的，则用 \uFFFD 无效字符作为替换
+    
+    fmt.Println(string(65)) // "A", not "65"
+    fmt.Println(string(0x4eac)) // "京" "\u4eac"
+    
+    标准库中有四个包对字符串处理尤为重要：bytes、strings、strconv和unicode包。
+    
+    ath和path/filepath包提供了关于文件路径名更一般的函数操作。
+    
+    path和path/filepath包提供了关于文件路径名更一般的函数操作。
+    
+    bytes包和strings同时提供了许多实用函数。
+    
+    数字转字符串
+        strconv.Itoa()
+        strconv.FormatInt()
+        fmt.Sprintf()
+    
+    输出不同进制, 两种方法
+        strconv.FormatInt(int64(x), 2) // "1111011" FormatUint
+        s := fmt.Sprintf("x=%b", x) // "x=1111011" %b、%d、%o和%x
+        
+    字符串解析为数字
+        x, err := strconv.Atoi("123") // x is an int
+        y, err := strconv.ParseInt("123", 10, 64) // base 10, up to 64 bits
+            ParseInt函数的第三个参数是用于指定整型数的大小；例如16表示int16，0则表示int。
+            在任何情况下，返回的结果y总是int64类型，你可以通过强制类型转换将它转为更小的整数类型。
+        有时候也会使用fmt.Scanf来解析输入的字符串和数字，
+        特别是当字符串和数字混合在一行的时候，它可以灵活处理不完整或不规则的输入。
+    fmt.Scanf混合处理字符串
+        var a int
+        var b string
+        n, err := fmt.Scanf("%d%s", &a, &b)  // 注意 Scanf中的参数地址
+        
+    常量
+        所有常量的运算都可以在编译期完成，这样可以减少运行时的工作，也方便其他编译优化
+        常量间的所有算术运算、逻辑运算和比较运算的结果也是常量，对常量的类型转换操作或以下函数调用都是返回常量结果：
+        len、cap、real、imag、complex和unsafe.Sizeof
+        
+    iota
+        常量生成器
+        
+    编译器为这些没有明确基础类型的数字常量提供比基础类型更高精度的算术运算；你可以认为至少有256bit的运算精度。
+    
+    通过延迟明确常量的具体类型，无类型的常量不仅可以提供更高的运算精度，而且可以直接用于更多的表达式而不需要显式的类型转换。
+    
+复合数据类型
+    
+    数组
+        数值类型, 做为参数时, 其副本被传递给了函数
+            虽然通过指针来传递数组参数是高效的，而且也允许在函数内部修改数组的值，但是数组依然是僵化的类型，因为数组的类型包含了僵化的长度信息。
+            除了像SHA256这类需要处理特定大小数组的特例外，数组依然很少用作函数参数；相反，我们一般使用slice来替代数组。
+        初始化
+            默认0值
+            var a [3]int = [3]int{1,2,3}
+            var b [3]int = [3]int{1,2} // b[2]为默认0值
+            q := [...]int{1,2,3} // q的长度根据初始值的个数来定
+            r := [...]int{0:1,3:9,5:10} // 使用索引初始化数组, 初始化索引的顺序是无关紧要的，而且没用到的索引可以省略
+    slice
+        引用类型
+        不能通过"=="进行比较
+        bytes.Equal函数来判断两个字节型slice是否相等（[]byte）
+        但是对于其他类型的slice，我们必须自己展开每个元素进行比较
+        
+        为何slice不直接支持比较运算符呢？
+            lice的元素是间接引用的
+            slice甚至可以包含自身
+            因为slice的元素是间接引用的, 底层数组的元素可能会被修改
+            
+        一个零值的slice等于nil。一个nil值的slice并没有底层数组
+        如果你需要测试一个slice是否是空的，使用len(s) == 0来判断，而不应该用s == nil来判断
+        
+        不过内置的copy函数可以方便地将一个slice复制另一个相同类型的slice
+        
+        append操作:
+            runes = append(runes, r)
+            内置的append函数则可以追加多个元素，甚至追加一个slice。
+    
+        要删除slice中间的某个元素并保存原有的元素顺序，可以通过内置的copy函数将后面的子slice向前依次移动一位完成
+        
+    map
+        引用类型
+        不能进行"=="比较, 可以和nil进行比较
+            要判断两个map是否包含相同的key和value，我们必须通过一个循环实现
+        初始化
+            ages := make(map[string]int) // mapping from strings to ints
+            或
+            ages := map[string]int{    // 提供一些初始值
+                "alice": 31,
+                "charlie": 34,
+            }
+            例:
+            	m1 := map[int]string{}
+                m2 := make(map[int]string)
+                    m1 m2 均为空的map, 均!=nil
+                var m3 map[int]string
+                    此m3 == nil, 向nil的map中填入值将引起panic
+        无序
+        所有的key都有相同的类型，所有的value也有着相同的类型，但是key和value之间可以是不同的数据类型
+        key必须是支持==比较运算符的数据类型
+        将浮点数用做key类型则是一个坏的想法
+        内置的delete函数可以删除元素
+            delete(ages, "alice") // remove element ages["alice"]
+        所有这些操作是安全的，即使这些元素不在map中也没有关系；如果一个查找失败将返回value类型对应的零值
+            此时如果想测试这个key是否存在, 可以使用查找返回的第二个参数: age, ok := ages["bob"]
+        Map的迭代顺序是不确定的
+        在向map存数据前必须先创建map
+        map的key必须是可比较的类型
+            所以slice, map等不可比较的类型都不能作为key
+            但是我们可以使用辅助函数达到此目的, 比如将slice字符串化: fmt.Sprintf("%q", list)
+            辅助函数可以返回忽略大小写的key, 也可返回可比较的类型: 整数, 数组或结构体时等
+        
+        unicode.ReplacementChar 无效Unicode码点
+        
+    结构体
+        值类型, 无论作为参数传递给参数还是作为参数返回都是返回的值, 所以一般使用结构的指针
+        结构体类型的零值是每个成员都是零值
+        声明与初始化
+            type Point struct{ X, Y int }
+            p := Point{1, 2} // 按成员顺序给定值, 在外部包中须注意未被导出的结构成员
+            anim := gif.GIF{LoopCount: nframes} // 指定结构成员的值, 其他成员为零值
+        下面两个语句等价:
+            pp := new(Point)
+            *pp = Point{1, 2}
+            
+        如果结构体的全部成员都是可以比较的，那么结构体也是可以比较的, 所以结构可以作为map的key
+        
+        匿名成员
+            没有成员名, 只有类型或类型指针, 点操作符可以直接访问匿名成员的成员
+            外层的结构体不仅仅是获得了匿名成员类型的所有成员，而且也获得了该类型导出的全部的方法。
+            
+    JSON
+        go的相关信息标准协议库:
+            encoding/json
+            encoding/xml
+            encoding/asn1
+            github.com/golang/protobuf
+            
+        将一个Go语言中类似movies的结构体slice转为JSON的过程叫编组（marshaling）
+            编组通过调用json.Marshal函数完成
+            Marshal函数返还一个编码后的字节slice，包含很长的字符串，并且没有空白缩进
+            
+            json.MarshalIndent函数产生整齐缩进的输出
+            
+            对输出流的json.Encoder编码对象
+            
+            只有导出的结构体成员才会被编码，这也就是我们为什么选择用大写字母开头的成员名称。
+            
+        解码
+            通过json.Unmarshal函数完成
+            流式的解码器json.Decoder，它可以从一个输入流解码JSON数据
+            
+第五章 函数
+    
+    函数参数中使用"blank identifier"(即"_")可以强调某个参数未被使用
+    
+    实参通过值的方式传递，因此函数的形参是实参的拷贝。对形参进行修改不会影响实参。
+    但是，如果实参包括引用类型，如指针，slice(切片)、map、function、channel等类型，实参可能会由于函数的间接引用被修改。
+    
+    fmt.Errorf函数使用fmt.Sprintf格式化错误信息并返回
+    
+    time.Sleep(time.Second << uint(tries)) // exponential back-off, 有用以2的指数增长, tries为整数
+    
+    一般而言，被调用函数f(x)会将调用信息和参数信息作为发生错误时的上下文放在错误信息中并返回给调用者，
+    调用者需要添加一些错误信息中不包含的信息，比如添加url到html.Parse返回的错误中。
+    
+    让我们来看看处理错误的第二种策略。如果错误的发生是偶然性的，或由不可预知的问题导致的。
+    一个明智的选择是重新尝试失败的操作。在重试时，我们需要限制重试的时间间隔或重试的次数，防止无限制的重试。
+    
+    我们就可以采用第三种策略：输出错误信息并结束程序。需要注意的是，这种策略只应在main中执行。
+    对库函数而言，应仅向上传播错误，除非该错误意味着程序内部包含不一致性，即遇到了bug，才能在库函数中结束程序: os.Exit(1) 。
+    
+    log中的所有函数，都默认会在错误信息之前输出时间信息。
+        log.Fatalf("Site is down: %v\n", err)
+        
+    第四种策略：有时，我们只需要输出错误信息就足够了，不需要中断程序的运行。我们可以通过log包提供函数
+        if err := Ping(); err != nil {
+            log.Printf("ping failed: %v; networking disabled",err)
+        }
+        log包中的所有函数会为没有换行符的字符串增加换行符。
+        
+    第五种，也是最后一种策略：我们可以直接忽略掉错误。
+    
+    io包保证任何由文件结束引起的读取失败都返回同一个错误——io.EOF
+    
+    函数类型的零值是nil。调用值为nil的函数值会引起panic错误：
+        var f func(int) int
+        f(3) // 此处f的值为nil, 会引起panic错误
+    函数值可以与nil比较
+    但是函数值之间是不可比较的，也不能用函数值作为map的key
+    
+    link, err := resp.Request.URL.Parse(a.Val)
+        返回<a></a> href属性中的url的绝对路径
+        
+    net http response.body
+        Body 内部有个标记会记录读到什么位置， ReadAll 会读到末尾，因此第二次再度是读不到数据的。
+        
+    reuse http response.body
+        //perform http request
+        resp, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(requestData))
+        defer resp.Body.Close()
+        utils.CheckErr(err)
+    
+        // read the response body to a variable
+        bodyBytes, _ := ioutil.ReadAll(resp.Body)
+        bodyString := string(bodyBytes)
+        //print raw response body for debugging purposes
+        fmt.Println("\n\n", bodyString, "\n\n")
+    
+        //reset the response body to the original unread state
+        resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+    
+    
+        // Step 3
+        oR := new(jsonResponse)
+        json.NewDecoder(resp.Body).Decode(oR)
+        
+    interfac{}表示函数的最后一个参数可以接收任意类型
+    
+    defer trace("bigSlowOperation")()
+    defer trace("bigSlowOperation")
+        上面两个defer语句不同
+            第一个会先计算trace的返回值(一般是个函数值), 然后在defer所在的函数执行结束时再执行trace返回的函数值
+            第二个会按正常流程, 在defer所在的函数执行结束时执行trace
+            
+    defer语句会在return更新返回值但是还没有返回执行执行, 可以理解为把return语句拆成了两条语句, defer在两条语句的中间执行
+    
+    保存网页内容至文件:
+        n, err = io.Copy(f, resp.Body)
+        
+    我们没有对f.close采用defer机制，因为这会产生一些微妙的错误。
+    许多文件系统，尤其是NFS，写入文件时发生的错误会被延迟到文件关闭时反馈。
+    如果没有检查文件关闭时的反馈信息，可能会导致数据丢失，而我们还误以为写入操作成功。
+    
+    不是所有的panic异常都来自运行时，直接调用内置的panic函数也会引发panic异常
+    
+    为了方便诊断问题，runtime包允许程序员输出堆栈信息。
+        示例见155页
+        
+    defer & recover
+        如果在deferred函数中调用了内置函数recover，并且定义该defer语句的函数发生了panic异常，
+        recover会使程序从panic中恢复，并返回panic value。导致panic异常的函数不会继续运行，但能正常返回。
+        在未发生panic时调用recover，recover会返回nil。
+        我们也可以通过调用runtime.Stack往错误信息中添加完整的堆栈调用信息。
+        
+    在声明方法时, 如果一个类型名本身是一个指针的话， 是不允许其出现在接收器中的
+    
+    当编译器解析一个选择器到方法时， 比如p.ScaleBy， 
+    它会首先去找直接定义在这个类型里的ScaleBy方法， 然后找被ColoredPoint的内嵌字段们引入的方法， 
+    然后去找Point和RGBA的内嵌字段引入的方法， 然后一直递归向下找。
+    
+    time.AfterFunc这个函数的功能是在指定的延迟时间之后来执行一个(译注： 另外的)函数
+        time.AfterFunc(10 * time.Second, func() { r.Launch() })    //函数值
+        time.AfterFunc(10 * time.Second, r.Launch)    // 方法值
+        
+    方法值与方法表达式
+        p := Point{1, 2}
+        q := Point{4, 6}
+        distanceFromP := p.Distance // method value 方法值
+        fmt.Println(distanceFromP(q)) // "5"
+        
+        distance := Point.Distance // method expression 方法表达式
+        fmt.Println(distance(p, q)) // "5"
+        
+    一个对象的变量或者方法如果对调用方是不可见的话，一般就被定义为“封装”
+    即定义一个对外的struct, 这个struct包含不对外的成员, 那么这些成员被struct封装, 如果要对成员进行修改, 可以对struct定义一些方法:
+        type Counter struct { n int }    // 将不对外的n封装于对外的Counter内
+        func (c *Counter) N() int { return c.n }
+        func (c *Counter) Increment() { c.n++ }
+        func (c *Counter) Reset() { c.n = 0 }
+    
+    如果我们想要封装一个对象，我们必须将其定义为一个struct。
+    
+    12.8章包含了一个打印出任意值的所有方法的程序，然后可以使用godoc -analysis=type tool(§10.7.4)
+    展示每个类型的方法和具体类型和接口之间的关系
+    
+    空接口类型对实现它的类型没有要求，所以我们可以将任意一个值赋给空接口类型。
+    
+    接口值可以使用==和!＝来进行比较。两个接口值相等仅当它们都是nil值，或者它们的动态类型相同并且动态值也根据这个动态类型的==操作相等。
+    因为接口值是可比较的，所以它们可以用在map的键或者作为switch语句的操作数。
+    然而，如果两个接口值的动态类型相同，但是这个动态类型是不可比较的（比如切片），将它们进行比较就会失败并且panic
+    接口类型是非常与众不同的。其它类型要么是安全的可比较类型（如基本类型和指针）要么是完全不可比较的类型（如切片slice，映射类型map，和函数func），
+    但是在比较接口值或者包含了接口值的聚合类型时，我们必须要意识到潜在的panic
+    同样的风险也存在于使用接口作为map的键或者switch的操作数
+    
+    当我们处理错误或者调试的过程中，得知接口值的动态类型是非常有帮助的。所以我们使用fmt包的%T动作:
+        var w io.Writer
+        w = os.Stdout
+        fmt.Printf("%T\n", w) // "*os.File"
+        (在fmt包内部，使用反射来获取接口动态类型的名称。)
+        
+    一个不包含任何值的nil接口值和一个刚好包含nil指针的接口值是不同的。
+    
+    标准库将它作为io.WriteString函数提供。这是向一个io.Writer接口写入字符串的推荐方法。
+    
+    接口只有当有两个或两个以上的具体类型必须以相同的方式进行处理时才需要。
+    
+并发
+    channel和map类似，channel也对应一个make创建的底层数据结构的引用
+    
+    两个相同类型的channel可以使用==运算符比较。如果两个channel引用的是相同的对象，
+    那么比较的结果为真。一个channel也可以和nil进行比较。
+    
+    对一个已经被close过的channel进行接收操作依然可以接受到之前已经成功发送的数据；
+    如果channel中已经没有数据的话将产生一个零值的数据。
+    
+    close(ch)
+    
+    基于无缓存Channels的发送和接收操作将导致两个goroutine做一次同步操作
+    
+    x, ok := <-naturals
+    
+    range循环是上面处理模式的简洁语法，它依次从channel接收数据，当channel被关闭并且没有值可接收时跳出循环。
+        range channel两个条件:
+            1 channel被关闭
+            2 没有值可接收
+            
+    其实你并不需要关闭每一个channel。只有当需要告诉接收者goroutine，所有的数据已经全部发送时才需要关闭channel。
+    
+    因为关闭操作只用于断言不再向channel发送新的数据，所以只有在发送者所在的goroutine才会调用close函数
+    
+    任何双向channel向单向channel变量的赋值操作都将导致该隐式转换。
+    
+    在某些特殊情况下，程序可能需要知道channel内部缓存的容量，可以用内置的cap函数获取
+    
+    对于内置的len函数，如果传入的是channel，那么将返回channel内部缓存队列中有效元素的个数
+    
+    如果你只是需要一个简单的队列，使用slice就可以了。
+    
+    泄漏的goroutines并不会被自动回收
+    因此确保每个不再需要的goroutine能正常退出是重要的
+    
+    gopl.io/ch8/thumbnail包提供了ImageFile函数来帮我们拉伸图片
+    
+    递增的计数器(当我们使用并发循环，但又不知道迭代次数时)
+        在每一个goroutine启动时加一，在goroutine退出时减一
+        这个计数器需要在多个goroutine操作时做到安全并且提供在其减为零之前一直等待的一种方法
+        这种计数类型被称为sync.WaitGroup
+        
+    when a channel is **full**, the sender waits for **another goroutine** to make some room by receiving
+    you can see an unbuffered channel as an always full one : there must be **another goroutine** to take what the sender sends.
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sync.WaitGroup
+    这需要一种特殊的计数器，这个计数器需要在多个goroutine操作时做到安全并且提供在其减为零之前一直等待的一种方法。
+    等待所有goroutine完成
+    func makeThumbnails6(filenames <-chan string) int64 {          //
+        sizes := make(chan int64)                                  //
+        var wg sync.WaitGroup // number of working goroutines      // 声明wg(sync.WaitGroup)
+        for f := range filenames {                                 //
+            wg.Add(1)                                              // 允许goroutine之前使wg加1
+            // worker                                              //
+            go func(f string) {                                    //
+                defer wg.Done()                                    // 在goroutine中调用defer, goroutine退出时使wg减1
+                thumb, err := thumbnail.ImageFile(f)               //
+                if err != nil {                                    //
+                    log.Println(err)                               //
+                    return                                         //
+                }                                                  //
+                info, _ := os.Stat(thumb) // OK to ignore error    //
+                sizes <- info.Size()                               //
+            }(f)                                                   //
+        }                                                          //
+        // closer                                                  //
+        go func() {                                                //
+            wg.Wait()                                              // 等待所有的wg完成, 注意是在一个单独的goroutine中
+            close(sizes)                                           //
+        }()                                                        //
+        var total int64                                            //
+        for size := range sizes {                                  //
+            total += size                                          //
+        }                                                          //
+        return total                                               //
+    }                                                              //
+
+结束goroutine:
+    利用channel的特性: 当channel没有被关闭时, 如果channel中没有数据, 是不能从其中读取到任何值, 读取方式阻塞的
+    但是这个channel被关闭时, 还是可以从其中读出零值的
+    可以配合select使用
+    goroutine结束后, main goroutine也会退出, 但是无法确认已释放了所有资源, 可以调用一个panic, runtime会把每一个
+    goroutine的栈dump下来, 但是如果还有goroutine没有退出, 他们可能没有办法被正确地清理掉
+    
+向其他goroutine广播
+    创建一个channel, 所有需要通信的goroutine从同一个channel中读取信息, 因为再channel(不要写入数据)被关闭之前
+    所有goroutine都是阻塞的, 只有当一个goroutine关闭了channel, 其他goroutine才能从此channel中读取零值, 以此
+    来完成goroutine的广播
+    
+time.Tick(时间长度)
+    返回一个channel, 每隔"时间长度"(比如 1 * time.second), 向其中写入一个时间值
+    
+为goroutine加锁
+    控制goroutine的数量
+    例一
+    func dirents(dir string) []os.FileInfo {
+        select {
+        case sema <- struct{}{}: // acquire token
+        case <-done:
+            return nil // cancelled
+        }
+        defer func() { <-sema }() // release token
+        // ...read directory...
+    }
+    例二                                                                              
+    var sema = make(chan struct{}, 20)                          // 最大允许20个dirents同时运行
+    // dirents returns the entries of directory dir.            //
+    func dirents(dir string) []os.FileInfo {                    //
+        sema <- struct{}{} // acquire token                     //
+        defer func() { <-sema }() // release token              //
+        // ...                                                  //
+    }                                                           //                    
+    当sema的length为1时, 可以实现互斥锁, 作用同sync.Mutex
+    但sema可以控制goroutine的数量, 就是说可以控制同一时间有多少个goroutine可以访问某个或某些变量
+    
+sync.Mutex
+    var mu sync.Mutex
+    互斥锁, 保护共享变量
+    惯例来说，被mutex所保护的变量是在mutex变量声明之后立刻声明的。如果你的做法和惯例不符，确保在文档里对你的做法进行说明。
+    锁的持有者在其他goroutine获取该锁之前需要调用Unlock。
+    goroutine在结束后释放锁是必要的，无论以哪条路径通过函数都需要释放，即使是在错误路径中，也要记得释放。
+    比如使用 defer mu.Unlock()
+    golang没有重入锁, 所以互斥锁应尽量加在最大范围内, 若加在原子操作中, 还是会出错
+    互斥锁同写锁, 当施加写锁时, 只有施加锁的goroutine可以写, 其他goroutine不能读也不能写
+    mu.Lock()/Unlock()
+    
+sync.RWMutex
+    var mu sync.RWMutex
+    多读单写锁
+    允许施加读锁或者写锁
+    读锁: 允许多个goroutine同时读取同一个变量, 但不允许写, mu.RLock()/RUnlock()
+    写锁: 只有加锁的goroutine可以写, 其他goroutine不能写也不能读, mu.Lock()/Unlock()
+
+可以对channel定义type:
+    type client chan<- string
