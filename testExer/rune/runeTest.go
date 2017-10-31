@@ -17,4 +17,14 @@ func main() {
 	for _, s := range a {
 		fmt.Printf("%T\t%c\n", s, s)
 	}
+
+	fmt.Println("==================")
+	r1 := rune(65)
+	fmt.Println(r1)
+	fmt.Println(string(r1))
+	r2 := []rune{65, 66, 67}
+	fmt.Println(string(r2))
+	// fmt.Println('A')
+	fmt.Println("===================")
+	fmt.Printf("%X\t%X", ' ', ',')
 }
