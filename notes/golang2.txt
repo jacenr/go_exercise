@@ -40,3 +40,73 @@
     response.body, 当其被读取时, 其内部会记录上次被读取的位置, 所以当读取过response.body一次后
     第二次读取不会读取到任何内容, 除非再次利用第一次读取到的数据
     
+golang2 补充 20171117
+    易犯错误: 忘关闭文件, 名称大小写, 变量的作用域
+    
+    关于变量的作用域:
+        变量的作用域是当前的语法块
+        不同的作用域, 即使变量同名, 最终效果是覆盖
+        
+        同一个作用域, 同名变量即使是多次初始化, 也是对变量的修改:
+            当一个变量被初始化之后, 如果其第二次或多次出现在":="
+            的左边, 也只是对此变量的修改
+            变量是不允许被多次初始化的, 但是有一种特殊情况: 当":="
+            左边有两个变量时, 应该至少有一个是未被初始化过的变量
+            
+    还有一种要考虑的情况是:
+        当函数中有外部变量的引用时, 引用的此函数定义时所在语法块
+        的变量, 而不是其被调用时的语法块的变量的引用
+        比如:
+            var n int
+            
+            func foo() (int, error) {
+                return 5, nil
+            }
+            
+            func bar() {
+                fmt.Println("bar n:", n)
+            }
+            
+            func main() {
+                n, err := foo()
+                if err != nil {
+                    fmt.Println(err)
+                    return
+                }
+                bar()
+                fmt.Println("main n:", n)
+            }
+            输出是:
+                bar n: 0    // 注意不是5, main内的n覆盖了全局变量n
+                main n: 5
+                
+golang方法集:
+    T   (t T)
+    *T  (t T)和(t *T)
+    正常情况下, T可以调用*T的方法, *T也可以调用T的方法
+    但是对于interface, T只能赋值给包含T类型方法的接口
+    *T却不但可以赋值给具有*T方法的接口, 也可以赋值给
+    具有T类型方法的接口
+
+关于类型或变量的公开与否:
+    结构B包含了结构a, 即使a不能导出, 如果a的
+    成员是可以导出的, 那么我们依旧可以使用B来
+    导出a中的成员, 例如:
+
+    package one
+    type a struct {    // a不能导出, a的成员可以导出
+        Name string
+        Title string
+    }
+    type B struct {
+        a
+        Tel int64
+    }
+    
+    package two
+    import "one"
+    func main() {
+        tom := one.B{ Tel : 123456 }
+        tom.Name = "TOM"
+        tom.Title = "CEO"
+    }
