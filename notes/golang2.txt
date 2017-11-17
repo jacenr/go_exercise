@@ -77,7 +77,7 @@ golang2 补充 20171117
                 fmt.Println("main n:", n)
             }
             输出是:
-                bar n: 0    // 注意不是5, main内的n覆盖了全局变量n
+                bar n: 0    // 注意不是5, 虽然main内的n覆盖了全局变量n，但是bar()种的n引用的是全局变量
                 main n: 5
                 
 golang方法集:
