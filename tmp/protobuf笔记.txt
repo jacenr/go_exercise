@@ -1,0 +1,218 @@
+<.proto>文件
+
+第一行必须指定syntax = "proto3";
+否则编译器默认proto3
+
+在proto中定义message, message对应于要传输的格式
+syntax = "proto3";
+
+message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;
+  int32 result_per_page = 3;
+}
+
+message中的每一个字段都有一个type和name
+    type可以是各种基本类型, 枚举类型, 甚至是message
+    
+字段name后的数字是tag
+    这些tag用于标识message二进制格式中的字段
+    一旦使用, 不应被改变
+    1-15 在编码时占用一个byte, 包含此tag及字段类型
+    16-2047 占两个byte
+    所以1-15应该分配给频繁使用的字段, 同时应该预留一些tag备用
+    tag范围: 1-(2^29-1), 19000-19999为预留范围, 不能使用
+    
+保留字段:
+    message Foo {
+        reserved 2, 15, 9 to 11;
+        reserved "foo", "bar";
+    }
+    
+For Go, the compiler generates a .pb.go file with a type for each message type in your file.
+
+Default Values(警惕默认值带来的副作用)
+    For strings, the default value is the empty string.
+    For bytes, the default value is empty bytes.
+    For bools, the default value is false.
+    For numeric types, the default value is zero.
+    For enums, the default value is the first defined enum value, which must be 0.
+    For message fields, the field is not set. Its exact value is language-dependent. See the generated code guide for details.
+    The default value for repeated fields is empty (generally an empty list in the appropriate language).
+    
+Scalar Value Types
+    https://developers.google.com/protocol-buffers/docs/proto3
+    
+Enumerations枚举类型
+    message SearchRequest {
+    string query = 1;
+    int32 page_number = 2;
+    int32 result_per_page = 3;
+    enum Corpus {
+        UNIVERSAL = 0;    // 注意第一个枚举常量必须map为0;
+        WEB = 1;
+        IMAGES = 2;
+        LOCAL = 3;
+        NEWS = 4;
+        PRODUCTS = 5;
+        VIDEO = 6;
+    }
+    Corpus corpus = 4;
+    }
+    
+    枚举alias:
+        把枚举的多个常量map到同一个值, 比如下面的STARTED和RUNNING
+        enum EnumAllowingAlias {
+            option allow_alias = true;    // 此选项必须设置为true
+            UNKNOWN = 0;
+            STARTED = 1;
+            RUNNING = 1;
+        }
+        enum EnumNotAllowingAlias {
+            UNKNOWN = 0;
+            STARTED = 1;
+            // RUNNING = 1;  // 没有设置选项, 编译时会出错
+        }
+        
+Using Other Message Types
+    message SearchResponse {
+        repeated Result results = 1;
+    }
+    
+    message Result {
+        string url = 1;
+        string title = 2;
+        repeated string snippets = 3;
+    }
+    
+import
+    import "myproject/other_protos.proto";
+    
+    import重定向
+        // new.proto
+        // All definitions are moved here
+        
+        // old.proto
+        // This is the proto that all clients are importing.
+        import public "new.proto";    // 当其他proto文件导入old.proto文件时, 其他文件可以同时导入new.proto, 但是没有public关键字的不行
+        import "other.proto";
+        
+        // client.proto
+        import "old.proto";
+        // You use definitions from old.proto and new.proto, but not other.proto
+        
+编译proto时
+    In general you should set the --proto_path flag to the root of your project and use fully qualified names for all imports.
+    
+message嵌套
+    message SearchResponse {
+        message Result {
+            string url = 1;
+            string title = 2;
+            repeated string snippets = 3;
+        }
+        repeated Result results = 1;
+    }    
+
+message的引用
+    message SomeOtherMessage {
+        SearchResponse.Result result = 1;    // 注意SearchResponse.Result是应用的上面的message中的类型
+    }
+
+更新message类型:
+    不要改变tag号
+    删除或者修改一个field, 不要使用旧的tag号
+    
+Maps
+    map<key_type, value_type> map_field = N;
+    eg: map<string, Project> projects = 3;
+    
+RPC:
+    service SearchService {
+        rpc Search (SearchRequest) returns (SearchResponse);
+    }
+    
+JSON Mapping
+    https://developers.google.com/protocol-buffers/docs/gotutorial
+    
+编译命令:
+    protoc --proto_path=IMPORT_PATH --cpp_out=DST_DIR --java_out=DST_DIR --python_out=DST_DIR --go_out=DST_DIR --ruby_out=DST_DIR --javanano_out=DST_DIR --objc_out=DST_DIR --csharp_out=DST_DIR path/to/file.proto
+    
+    
+    
+二进制编码形式:(参考https://developers.google.com/protocol-buffers/docs/encoding)
+
+int32:
+    message Test1 {
+    required int32 a = 1;
+    }
+    
+    设置a=150
+    二进制编码形式是:
+        08 96 01
+        
+        08 
+        --> 0000 1000 
+        --> 000 1000 
+        --> 右三位得0, 0类型为varints, 接下来的 96 01 为数值
+        --> 000 1右移三位得1, 1即为message中tag为1的字段
+        
+        96 01
+        --> 1001 0110  0000 0001
+        --> 150
+        注: 转换过程, 去掉最高为, 留低7位, 然后取反码
+
+string:
+    message Test2 {
+    required string b = 2;
+    }
+    设置b="testing"
+    二进制编码形式:
+        12 07 74 65 73 74 69 6e 67
+        
+        12
+        --> 0001 0010
+        --> 001 0010
+        --> 右三位得010为2, 即类型为2, 进而知接下来的一个字节07为长度
+        --> 左四位右移三位0010为2, 得tag为2
+        
+        07
+        --> wire type 2数据的长度为7
+        
+        74 65 73 74 69 6e 67
+        --> "testing"
+        
+嵌套message:
+    message Test3 {
+    required Test1 c = 3;
+    }
+    设置Test1的字段a为150
+    二进制编码为:
+        1a 03 08 96 01
+    
+        1a
+        --> 0001 1010 --> 001 1010
+        --> 右三位010, 得2, 即wire type为2, 进而得知接下来的一个字节(03)为长度
+            **注: 嵌套的wire type与string的wire type相同
+        --> 高四位右移三位得0011, 为十进制的3, 得tag为3
+        
+        03
+        --> 后面的数据长度为3
+        
+        08 96 01
+        --> Test1的tag为1的字段值为150(见int32的解释)
+        
+repeated field:
+    message Test4 {
+    repeated int32 d = 4 [packed=true];    //proto3默认packed=true
+    }
+    
+    providing the values 3, 270, and 86942 for the repeated field d
+    
+    22        // tag (field number 4, wire type 2)
+    06        // payload size (6 bytes)
+    03        // first element (varint 3)
+    8E 02     // second element (varint 270)
+    9E A7 05  // third element (varint 86942)
+    
+    
