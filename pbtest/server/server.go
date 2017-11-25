@@ -49,6 +49,7 @@ func main() {
 		// io.Copy(conn, adb_m_s)
 
 		conn.Write(adb_m)
+		// conn.Write([]byte("test"))
 		fmt.Println("Send.")
 	}
 
