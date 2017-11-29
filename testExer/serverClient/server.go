@@ -23,8 +23,8 @@ func main() {
 		rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 		for i := 0; i < 10; i++ {
 			fmt.Println(i)
-			// rw.WriteString("test" + strconv.Itoa(i) + "\n")
-			rw.Write([]byte("test" + strconv.Itoa(i) + "\n"))
+			// rw.WriteString("test" + strconv.Itoa(i) + "\n")    // 可以写string
+			rw.Write([]byte("test" + strconv.Itoa(i) + "\n")) // 也可以写[]byte
 			rw.Flush()
 			time.Sleep(1 * time.Second)
 		}
