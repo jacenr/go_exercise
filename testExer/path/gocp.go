@@ -12,6 +12,6 @@ func main() {
 	fmt.Println(absPath)
 	cwd, _ := os.Getwd()
 	fmt.Println(cwd)
-	dirList, _ := filepath.Glob("/tmp/*")
+	dirList, _ := filepath.Glob("/data/*/test*")
 	fmt.Println(dirList)
 }
