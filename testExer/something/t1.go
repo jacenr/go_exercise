@@ -50,3 +50,8 @@ func check(d string) bool {
 	}
 	return false
 }
+
+func main() {
+	s := "/data/godev"
+	fmt.Println(check(s))
+}
