@@ -24,7 +24,7 @@ func (p *paths) initP(s string) error {
 	p.name = s
 	fi, fiErr := os.Lstat(s)
 	if fiErr != nil {
-		lg.Fatalln(fiErr)
+		lg.Println(fiErr)
 	}
 	if fi == nil {
 		p.exist = false
@@ -46,7 +46,7 @@ func (p *paths) initP(s string) error {
 
 var dP paths
 
-func check(d string) bool {
+func check(d string, l int) bool {
 	// sP := paths{}
 	// dP = paths{}
 	// sP.initP(s)
@@ -55,12 +55,15 @@ func check(d string) bool {
 		return true
 	}
 	if (!dP.dirPath) && (!dP.exist) {
-		return true
+		if l == 1 {
+			return true
+		}
 	}
 	return false
 }
 
 func main() {
-	s := "/data/godev"
-	fmt.Println(check(s))
+	s := "/data/godevifs"
+	fmt.Println(s)
+	fmt.Println(check(s,1))
 }
