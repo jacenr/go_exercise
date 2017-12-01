@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"stings"
+	"strings"
 )
 
 var lg *log.Logger
