@@ -2,13 +2,22 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"path/filepath"
+	"stings"
 )
+
+var lg *log.Logger
 
 type paths struct {
 	name    string
 	dirPath bool
 	exist   bool
+}
+
+func init() {
+	lg = log.New(os.Stdout, "log", log.Lshortfile)
 }
 
 func (p *paths) initP(s string) error {
