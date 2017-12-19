@@ -55,3 +55,5 @@ func main() {
 
 // 测试表明2：只要channel缓存个数>=goroutine数目，即写入没问题，多个goroutine可以同时对
 // 同一个channel写入数据是没有问题的，无须加锁。
+
+// 虽然多个goroutine同时读写同一个channel在操作上是没有问题，但是据说对性能有影响。
