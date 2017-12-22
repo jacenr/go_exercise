@@ -26,5 +26,13 @@ func main() {
 	fmt.Println(string(r2))
 	// fmt.Println('A')
 	fmt.Println("===================")
-	fmt.Printf("%X\t%X", ' ', ',')
+	fmt.Printf("%X\t%X\n", ' ', ',')
+	fmt.Println("===================")
+	str1 := "testtest"
+	fmt.Println(len([]rune(str1)))
+	fmt.Println(len([]byte(str1)))
+	str2 := "你好世界"
+	fmt.Println(len([]rune(str2)))
+	fmt.Println(len([]byte(str2)))
+	// rune适用范围貌似比byte更广。
 }
