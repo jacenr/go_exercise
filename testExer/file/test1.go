@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	// "time"
 )
@@ -37,4 +38,11 @@ func main() {
 		fmt.Printf("%s\n", txt)
 	}
 	fmt.Println(strs[0] == strs[2])
+	dirContent, dErr := ioutil.ReadDir("test")
+	if dErr != nil {
+		fmt.Println(dErr)
+	}
+	for _, fi := range dirContent {
+		fmt.Println(fi.Name())
+	}
 }
