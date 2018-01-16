@@ -10,7 +10,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	err := os.Symlink("file2", "slink1")
+	err = os.Symlink("file2", "slink1")
 	if err != nil {
 		fmt.Println(err)
 	}
