@@ -53,3 +53,7 @@ func main() {
 
 // 测试结果: 结构中内嵌sync.Mutex仅仅是作为struct的一个成员而已, 其即可以对
 // struct其他成员加锁, 也可以对非struct成员的数据加锁
+
+// mutex是个struct, 它具有Lock()和Unlock()方法, 同一时刻只能由一个goroutine
+// 对同一个mutex施加lock, 其他goroutine就会一直阻塞至mutex nulock, 以达到对
+// mutex之后的代码加锁的目的.
