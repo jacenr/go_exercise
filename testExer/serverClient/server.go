@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"strconv"
@@ -16,7 +17,10 @@ func main() {
 	}
 	for {
 		conn, err := lst.Accept()
-		defer conn.Close()
+		// defer func() {
+		// 	fmt.Println("closed.")
+		// 	conn.Close()
+		// }()
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -28,6 +32,7 @@ func main() {
 			rw.Flush()
 			time.Sleep(1 * time.Second)
 		}
+		conn.Close()
 		// rw.Flush()
 	}
 }
